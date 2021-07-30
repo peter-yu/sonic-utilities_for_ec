@@ -2126,7 +2126,7 @@ def add_portchannel(ctx, portchannel_name, min_links, fallback, fast_rate):
 @click.pass_context
 def remove_portchannel(ctx, portchannel_name):
     """Remove port channel"""
-    
+
     db = ValidatedConfigDBConnector(ctx.obj['db'])
     if ADHOC_VALIDATION:
         if is_portchannel_name_valid(portchannel_name) != True:
@@ -2136,6 +2136,10 @@ def remove_portchannel(ctx, portchannel_name):
         # Don't proceed if the port channel does not exist
         if is_portchannel_present_in_db(db, portchannel_name) is False:
             ctx.fail("{} is not present.".format(portchannel_name))
+
+        subport = interface_has_subport(db, portchannel_name)
+        if len(subport):
+            ctx.fail("{} contains a subport interface. Remove subport interface first".format(portchannel_name))
 
         # Dont let to remove port channel if vlan membership exists
         for k,v in db.get_table('VLAN_MEMBER'): # TODO: MISSING CONSTRAINT IN YANG MODEL
