@@ -10,6 +10,7 @@ import show.main as show
 from utilities_common.db import Db
 from importlib import reload
 import utilities_common.bgp_util as bgp_util
+from mock import patch
 
 IP_VERSION_PARAMS_MAP = {
     "ipv4": {
@@ -355,6 +356,7 @@ class TestVlan(object):
         assert result.exit_code != 0
         assert "Error: vlan: 1027 can not be removed. First remove vxlan mapping" in result.output
 
+    @patch('config.main.clicommon.run_command', mock.Mock(return_value=True))
     def test_config_vlan_del_vlan(self, mock_restart_dhcp_relay_service):
         runner = CliRunner()
         db = Db()
@@ -370,11 +372,11 @@ class TestVlan(object):
         # remove vlan IP`s
         result = runner.invoke(config.config.commands["interface"].commands["ip"].commands["remove"], ["Vlan1000", "192.168.0.1/21"], obj=obj)
         print(result.exit_code, result.output)
-        assert result.exit_code != 0
+        assert result.exit_code == 0
 
         result = runner.invoke(config.config.commands["interface"].commands["ip"].commands["remove"], ["Vlan1000", "fc02:1000::1/64"], obj=obj)
         print(result.exit_code, result.output)
-        assert result.exit_code != 0
+        assert result.exit_code == 0
 
         # del vlan with IP
         result = runner.invoke(config.config.commands["vlan"].commands["del"], ["1000"], obj=db)

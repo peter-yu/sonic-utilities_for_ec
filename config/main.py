@@ -4608,7 +4608,7 @@ def remove(ctx, interface_name, ip_addr):
     if interface_addresses == {ip_address}:
         # Check both IPv4 and IPv6 routes.
         ip_versions = [ "ip", "ipv6"]
-        for ip_ver in ip_versions:
+        for ip_ver in ip_versions:  
             # Compete the command and ask Zebra to return the routes.
             # Scopes of all VRFs will be checked.
             cmd = "show {} route vrf all static".format(ip_ver)
@@ -4631,7 +4631,8 @@ def remove(ctx, interface_name, ip_addr):
         command = ['sudo', 'ip', 'netns', 'exec', str(ctx.obj['namespace']), 'ip', 'neigh', 'flush', 'dev', str(interface_name), str(ip_address)]
     else:
         command = ['ip', 'neigh', 'flush', 'dev', str(interface_name), str(ip_address)]
-    clicommon.run_command(command)
+    # Manually flush deprecated neighbors, and ignore error because the interface might have been removed in some rare circumstances
+    clicommon.run_command(command, ignore_error = True)
 
 #
 # 'loopback-action' subcommand
